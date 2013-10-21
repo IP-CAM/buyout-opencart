@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+	<id>Buyout option </id>
+	<version>1.5.x</version>
+	<vqmver required="true">2.4.0</vqmver>
+	<author>Julian</author>
+	
+	<file name="catalog/controller/checkout/success.php">
+		<operation>
+			<search position="after"><![CDATA[if (isset($this->session->data['order_id'])) {]]></search>
+
+<!-- 
+
+	FIND 'Buyout' below (row 29) and change it with your own value (option name)
+
+ -->
+
+			<add><![CDATA[		$this->load->model('account/order');
+								$current_order_id=$this->session->data['order_id'];
+								$order_info = $this->model_account_order->getOrder($current_order_id);
+								if ($order_info) {
+									$order_products = $this->model_account_order->getOrderProducts($current_order_id);
+									foreach ($order_products as $order_product) {
+										$option_data = array();
+												
+										$order_options = $this->model_account_order->getOrderOptions($current_order_id, $order_product['order_product_id']);
+												
+										foreach ($order_options as $order_option) {
+											if ($order_option['name'] == 'Buyout') {
+												$this->db->query("UPDATE " . DB_PREFIX . "product_option_value SET quantity = '0' WHERE product_option_value_id = '" . (int)$order_option['product_option_value_id'] . "'");											
+
+												$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = '0' WHERE product_id = '" . (int)$order_product['product_id'] . "'");
+												
+											}
+										}
+												
+									}
+								}
+			
+			]]></add>
+		</operation>		
+	</file>
+
+</modification>
